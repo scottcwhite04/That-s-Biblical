@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>That's Biblical - Blog Posts by Category</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2c3e50;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .blog-category {
+            margin-top: 40px;
+        }
+
+        .blog-category h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .blog-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .blog-list li {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .blog-list li h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .blog-list li p {
+            margin-bottom: 0;
+        }
+    </style>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const SUPABASE_URL = 'https://vyyvaapvdxmcawdosbzf.supabase.co';
+        const SUPABASE_KEY = 'your-supabase-key'; // Replace with your Supabase key
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBlogs();
+        });
+
+        async function fetchBlogs() {
+            const { data, error } = await supabase
+                .from('blogs')
+                .select('title, content, category, created_at');
+
+            if (error) {
+                console.error('Error fetching blogs:', error);
+                return;
+            }
+
+            const categories = [
+                "Bible Studies", "Theology and Doctrine", "Devotionals", "Apologetics", 
+                "Christian Living", "Biblical History & History", "End Times and Prophecy", 
+                "Difficult Bible Questions", "Bible Character Studies", 
+                "Family, Marriage, and Parenting", "Church History", 
+                "Christian Ethics & Worldview", "Sermon & Teaching Resources", 
+                "Testimonies & Faith Stories"
+            ];
+
+            const container = document.querySelector('.container');
+            container.innerHTML = '';
+
+            categories.forEach(category => {
+                const categoryBlogs = data.filter(blog => blog.category === category);
+                if (categoryBlogs.length > 0) {
+                    const categorySection = document.createElement('section');
+                    categorySection.className = 'blog-category';
+                    categorySection.innerHTML = `<h2>${category}</h2>`;
+                    const blogList = document.createElement('ul');
+                    blogList.className = 'blog-list';
+                    categoryBlogs.forEach(blog => {
+                        const blogItem = document.createElement('li');
+                        blogItem.innerHTML = `
+                            <h3>${blog.title}</h3>
+                            <p>${blog.content.substring(0, 200)}...</p>
+                            <small>Published on: ${new Date(blog.created_at).toLocaleDateString()}</small>
+                        `;
+                        blogList.appendChild(blogItem);
+                    });
+                    categorySection.appendChild(blogList);
+                    container.appendChild(categorySection);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logo">That's Biblical</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="blogs.html">Blogs</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Blog posts by category will be inserted here -->
+    </div>
+
+    <footer>
+        <p>&copy; 2025 That's Biblical. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
