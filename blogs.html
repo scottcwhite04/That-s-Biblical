@@ -73,10 +73,19 @@
             font-size: 1rem;
             border-radius: 4px;
             border: 1px solid #ccc;
+            margin-right: 10px;
         }
 
         .filter-container input {
             width: 200px;
+        }
+
+        .filter-container button {
+            cursor: pointer;
+        }
+
+        .filter-container button:hover {
+            background: #e0e0e0;
         }
 
         .search-hints {
@@ -155,6 +164,7 @@
             document.getElementById('category-filter').addEventListener('change', fetchBlogs);
             document.getElementById('sort-button').addEventListener('click', fetchBlogs);
             document.getElementById('search-button').addEventListener('click', fetchBlogs);
+            document.getElementById('reset-button').addEventListener('click', fetchBlogs);
             document.getElementById('search-input').addEventListener('input', showSearchHints);
         }
 
@@ -208,6 +218,7 @@
                     <div class="search-hints" id="search-hints"></div>
                 </div>
                 <button id="search-button">Search</button>
+                <button id="reset-button" style="display: none;">Reset</button>
                 <select id="category-filter">
                     <option value="">All Categories</option>
                     ${categories.map(category => `<option value="${category}">${category}</option>`).join('')}
@@ -249,6 +260,13 @@
             });
 
             setupEventListeners();
+
+            // Show reset button if search is performed
+            if (searchQuery) {
+                document.getElementById('reset-button').style.display = 'inline-block';
+            } else {
+                document.getElementById('reset-button').style.display = 'none';
+            }
         }
 
         async function showSearchHints() {
