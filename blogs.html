@@ -98,6 +98,7 @@
             width: 200px;
             margin-top: 2px;
             display: none;
+            z-index: 1000;
         }
 
         .search-hints div {
@@ -163,8 +164,12 @@
         function setupEventListeners() {
             document.getElementById('category-filter').addEventListener('change', fetchBlogs);
             document.getElementById('sort-button').addEventListener('click', fetchBlogs);
-            document.getElementById('search-button').addEventListener('click', fetchBlogs);
-            document.getElementById('reset-button').addEventListener('click', fetchBlogs);
+            document.getElementById('reset-button').addEventListener('click', () => {
+                document.getElementById('search-input').value = '';
+                document.getElementById('category-filter').value = '';
+                document.getElementById('sort-option').value = 'date-desc';
+                fetchBlogs();
+            });
             document.getElementById('search-input').addEventListener('input', showSearchHints);
         }
 
@@ -175,7 +180,7 @@
 
             let query = supabase
                 .from('blogs')
-                .select('id, title, content, category, created_at');
+                .select('id, title, short_description, content, category, created_at');
 
             if (categoryFilter) {
                 query = query.eq('category', categoryFilter);
@@ -249,7 +254,7 @@
                         });
                         blogItem.innerHTML = `
                             <h3>${blog.title}</h3>
-                            <p>${blog.content.substring(0, 200)}...</p>
+                            <p>${blog.short_description}</p>
                             <small>Published on: ${new Date(blog.created_at).toLocaleDateString()}</small>
                         `;
                         blogList.appendChild(blogItem);
@@ -262,7 +267,7 @@
             setupEventListeners();
 
             // Show reset button if search is performed
-            if (searchQuery) {
+            if (searchQuery || categoryFilter || sortOption !== 'date-desc') {
                 document.getElementById('reset-button').style.display = 'inline-block';
             } else {
                 document.getElementById('reset-button').style.display = 'none';
