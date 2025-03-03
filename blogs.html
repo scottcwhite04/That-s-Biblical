@@ -124,8 +124,9 @@
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            fetchBlogs();
+            fetchBlogs().then(() => {
+                setupEventListeners();
+            });
         });
 
         function setupEventListeners() {
@@ -135,9 +136,9 @@
         }
 
         async function fetchBlogs() {
-            const categoryFilter = document.getElementById('category-filter').value;
-            const sortOption = document.getElementById('sort-option').value;
-            const searchQuery = document.getElementById('search-input').value;
+            const categoryFilter = document.getElementById('category-filter') ? document.getElementById('category-filter').value : '';
+            const sortOption = document.getElementById('sort-option') ? document.getElementById('sort-option').value : '';
+            const searchQuery = document.getElementById('search-input') ? document.getElementById('search-input').value : '';
 
             let query = supabase
                 .from('blogs')
@@ -195,9 +196,6 @@
                 </div>
             `;
             container.appendChild(filterContainer);
-
-            // Add event listeners after elements are created
-            setupEventListeners();
 
             categories.forEach(category => {
                 const categoryBlogs = data.filter(blog => blog.category === category);
