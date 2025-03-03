@@ -79,6 +79,28 @@
             width: 200px;
         }
 
+        .search-hints {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            width: 200px;
+            margin-top: 2px;
+            display: none;
+        }
+
+        .search-hints div {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-hints div:hover {
+            background: #e0e0e0;
+        }
+
         .blog-category {
             margin-top: 40px;
         }
@@ -133,6 +155,7 @@
             document.getElementById('category-filter').addEventListener('change', fetchBlogs);
             document.getElementById('sort-button').addEventListener('click', fetchBlogs);
             document.getElementById('search-button').addEventListener('click', fetchBlogs);
+            document.getElementById('search-input').addEventListener('input', showSearchHints);
         }
 
         async function fetchBlogs() {
@@ -180,7 +203,10 @@
             const filterContainer = document.createElement('div');
             filterContainer.className = 'filter-container';
             filterContainer.innerHTML = `
-                <input type="text" id="search-input" placeholder="Search blogs..." />
+                <div style="position: relative;">
+                    <input type="text" id="search-input" placeholder="Search blogs..." />
+                    <div class="search-hints" id="search-hints"></div>
+                </div>
                 <button id="search-button">Search</button>
                 <select id="category-filter">
                     <option value="">All Categories</option>
@@ -221,6 +247,44 @@
                     container.appendChild(categorySection);
                 }
             });
+
+            setupEventListeners();
+        }
+
+        async function showSearchHints() {
+            const searchQuery = document.getElementById('search-input').value;
+            const searchHintsContainer = document.getElementById('search-hints');
+
+            if (searchQuery.length < 2) {
+                searchHintsContainer.style.display = 'none';
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('blogs')
+                .select('title')
+                .ilike('title', `%${searchQuery}%`)
+                .limit(5);
+
+            if (error) {
+                console.error('Error fetching search hints:', error);
+                return;
+            }
+
+            if (data.length > 0) {
+                searchHintsContainer.innerHTML = data.map(blog => `<div>${blog.title}</div>`).join('');
+                searchHintsContainer.style.display = 'block';
+
+                document.querySelectorAll('.search-hints div').forEach(hint => {
+                    hint.addEventListener('click', () => {
+                        document.getElementById('search-input').value = hint.textContent;
+                        searchHintsContainer.style.display = 'none';
+                        fetchBlogs();
+                    });
+                });
+            } else {
+                searchHintsContainer.style.display = 'none';
+            }
         }
     </script>
 </head>
