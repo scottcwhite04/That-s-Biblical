@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Expenses - That's Budgeting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .side-nav {
+            width: 200px;
+            background: #34495e;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .side-nav h2 {
+            color: white;
+        }
+
+        .side-nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .side-nav a:hover {
+            background: #2980b9;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2c3e50;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .sign-out {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            background: #e74c3c;
+            transition: background 0.3s;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .sign-out:hover {
+            background: #c0392b;
+        }
+
+        .expenses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .expenses-table th, .expenses-table td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .expenses-table th {
+            background: #2c3e50;
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .expenses-table td {
+            background: #f9f9f9;
+        }
+
+        .edit-button, .save-button {
+            padding: 8px 12px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-button:hover, .save-button:hover {
+            background: #34495e;
+        }
+
+        .form-container {
+            margin-top: 40px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-container h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            padding: 12px 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .form-group button:hover {
+            background: #34495e;
+        }
+    </style>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const SUPABASE_URL = 'https://jmifqwpovlrrmpnefaxb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptaWZxd3Bvdmxycm1wbmVmYXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2Mjg5OTYsImV4cCI6MjA1NjIwNDk5Nn0.bSryKBcqW5pzyY_D5-glqcwJwaLB355O8jQ8LJPXk-s'; // Replace with your actual Supabase key
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchExpenses();
+        });
+
+        async function fetchExpenses() {
+            const { data, error } = await supabase
+                .from('expenses')
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching expenses:', error);
+                return;
+            }
+
+            const tableBody = document.querySelector('#expenses-table tbody');
+            tableBody.innerHTML = '';
+
+            data.forEach(expense => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" value="${expense.expense_name}" data-id="${expense.id}" class="editable expense_name"></td>
+                    <td><input type="date" value="${expense.due_date}" data-id="${expense.id}" class="editable due_date"></td>
+                    <td><input type="number" step="0.01" value="${expense.amount}" data-id="${expense.id}" class="editable amount"></td>
+                    <td>
+                        <select data-id="${expense.id}" class="editable pay_cycle_frequency">
+                            <option value="weekly" ${expense.pay_cycle_frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+                            <option value="bi-weekly" ${expense.pay_cycle_frequency === 'bi-weekly' ? 'selected' : ''}>Bi-Weekly</option>
+                            <option value="semi-monthly" ${expense.pay_cycle_frequency === 'semi-monthly' ? 'selected' : ''}>Semi-Monthly</option>
+                            <option value="monthly" ${expense.pay_cycle_frequency === 'monthly' ? 'selected' : ''}>Monthly</option>
+                        </select>
+                    </td>
+                    <td><button class="save-button" onclick="saveExpense(${expense.id})">Save</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        window.saveExpense = async (id) => {
+            const expense_name = document.querySelector(`.expense_name[data-id="${id}"]`).value;
+            const due_date = document.querySelector(`.due_date[data-id="${id}"]`).value;
+            const amount = parseFloat(document.querySelector(`.amount[data-id="${id}"]`).value);
+            const pay_cycle_frequency = document.querySelector(`.pay_cycle_frequency[data-id="${id}"]`).value;
+
+            console.log('Updating expense:', { expense_name, due_date, amount, pay_cycle_frequency });
+
+            const { data, error } = await supabase
+                .from('expenses')
+                .update({ expense_name, due_date, amount, pay_cycle_frequency })
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error updating expense:', error);
+                alert('There was an error updating your expense. Please try again.');
+            } else {
+                alert('Expense updated successfully!');
+                fetchExpenses();
+            }
+        }
+
+        async function addExpense(event) {
+            event.preventDefault();
+
+            const expense_name = document.querySelector('#new_expense_name').value;
+            const due_date = document.querySelector('#new_due_date').value;
+            const amount = parseFloat(document.querySelector('#new_amount').value);
+            const pay_cycle_frequency = document.querySelector('#new_pay_cycle_frequency').value;
+
+            console.log('Adding new expense:', { expense_name, due_date, amount, pay_cycle_frequency });
+
+            const { data, error } = await supabase
+                .from('expenses')
+                .insert([{ expense_name, due_date, amount, pay_cycle_frequency }]);
+
+            if (error) {
+                console.error('Error adding expense:', error);
+                alert('There was an error adding your expense. Please try again.');
+            } else {
+                alert('Expense added successfully!');
+                fetchExpenses();
+                document.querySelector('#add-expense-form').reset();
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logo">That's Budgeting</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="side-nav">
+            <h2>Dashboard Menu</h2>
+            <a href="#overview">Overview</a>
+            <a href="manage-bills.html">Manage Bills</a>
+            <a href="#budget-planner">Budget Planner</a>
+            <a href="#expense-tracker">Expense Tracker</a>
+            <a href="#savings-goals">Savings Goals</a>
+            <a href="#reports">Reports</a>
+            <a href="#settings">Settings</a>
+            <a href="#" id="logout-btn" class="sign-out">Sign Out</a>
+        </div>
+
+        <div class="main-content">
+            <h2>Manage Expenses</h2>
+            <table class="expenses-table" id="expenses-table">
+                <thead>
+                    <tr>
+                        <th>Expense Name</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Pay Cycle Frequency</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Expenses data will be inserted here -->
+                </tbody>
+            </table>
+
+            <div class="form-container">
+                <h3>Add New Expense</h3>
+                <form id="add-expense-form" onsubmit="addExpense(event)">
+                    <div class="form-group">
+                        <label for="new_expense_name">Expense Name</label>
+                        <input type="text" id="new_expense_name" name="new_expense_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_due_date">Due Date</label>
+                        <input type="date" id="new_due_date" name="new_due_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_amount">Amount</label>
+                        <input type="number" step="0.01" id="new_amount" name="new_amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_pay_cycle_frequency">Pay Cycle Frequency</label>
+                        <select id="new_pay_cycle_frequency" name="new_pay_cycle_frequency" required>
+                            <option value="weekly">Weekly</option>
+                            <option value="bi-weekly">Bi-Weekly</option>
+                            <option value="semi-monthly">Semi-Monthly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Add Expense</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 That's Budgeting. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
