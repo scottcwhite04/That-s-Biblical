@@ -6,20 +6,11 @@
     <title>Article</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
             color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
         }
 
         header {
@@ -41,6 +32,7 @@
             display: flex;
             gap: 1.5rem;
             padding: 0;
+            margin: 0;
         }
 
         nav ul li {
@@ -51,6 +43,50 @@
             color: white;
             text-decoration: none;
             font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .meta {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        article {
+            line-height: 1.6;
+        }
+
+        article p {
+            margin-bottom: 20px;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+        }
+
+        article blockquote {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 5px solid #ccc;
+            font-style: italic;
         }
 
         footer {
@@ -94,7 +130,7 @@
             if (data) {
                 document.querySelector('.container').innerHTML = `
                     <h1>${data.title}</h1>
-                    <p><small>Published on: ${new Date(data.created_at).toLocaleDateString()}</small></p>
+                    <p class="meta">Published on: ${new Date(data.created_at).toLocaleDateString()}</p>
                     <article>${data.content}</article>
                 `;
             } else {
