@@ -250,7 +250,7 @@
                     categoryBlogs.forEach(blog => {
                         const blogItem = document.createElement('li');
                         blogItem.addEventListener('click', () => {
-                            window.location.href = `blog.html?id=${blog.id}`;
+                            window.location.href = `article.html?id=${blog.id}`;
                         });
                         blogItem.innerHTML = `
                             <h3>${blog.title}</h3>
